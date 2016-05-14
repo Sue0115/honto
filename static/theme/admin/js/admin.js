@@ -207,45 +207,45 @@ $(function(){
 var timeoutObject;
 //showtips("信息","时长","颜色")lcc ->2013-07-12
 function showtips(content, class_name) {
+     alert(content);
+//     var object = timeoutObject;
+//     class_name = class_name || 'alert-danger';
     
-    var object = timeoutObject;
-    class_name = class_name || 'alert-danger';
-    
-    if( $('#_showtips').length > 0 ) {
-        $('#_showtips').remove();
-        clearTimeout(object);
-    }
+//     if( $('#_showtips').length > 0 ) {
+//         $('#_showtips').remove();
+//         clearTimeout(object);
+//     }
     
 
-//    var string  = '<p id="_showtips" style="color:#FFF;font:12px simsun, arial, verdana;font-weight:bold;height:24px;line-height:24px;';
-//        string += '_line-height:26px;overflow:hidden;opacity:0.95;filter:alpha(opacity=95);padding:0 12px;border';
-//        string += '-radius:2px;z-index:999;text-shadow:1px 1px 0px #555;box-shadow:1px 1px 0px #555;display:none">' + content + '</p>';
+// //    var string  = '<p id="_showtips" style="color:#FFF;font:12px simsun, arial, verdana;font-weight:bold;height:24px;line-height:24px;';
+// //        string += '_line-height:26px;overflow:hidden;opacity:0.95;filter:alpha(opacity=95);padding:0 12px;border';
+// //        string += '-radius:2px;z-index:999;text-shadow:1px 1px 0px #555;box-shadow:1px 1px 0px #555;display:none">' + content + '</p>';
 
         
-    var string  = '<div id="_showtips" class="alert '+class_name+'" style="z-index:999;display:none">';
-    	string += content;
-        string += '</div>';
-        
-    $('body').append(string);
+//     var string  = '<div id="_showtips" class="alert '+class_name+'" style="z-index:999;display:none;color:#09C0E6;background:#001118;border:none;">';
+//     	string += content;
+//         string += '</div>';
+       
+//     $('body').append(string);
     
-    $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 150, left: $(window).width()/2 - $('#_showtips').width()/2 }).show();
+//     $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 100, left: $(window).width()/2 - $('#_showtips').width()/2 -20}).show();
     
-    $(window).bind({
-        resize: function() {
-            if( $('#_showtips').length > 0 ) {
-                $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 150, left: $(window).width()/2 - $('#_showtips').width()/2 });
-            }
-        },
-        scroll: function() {
-            if( $('#_showtips').length > 0 ) {
-                $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 150, left: $(window).width()/2 - $('#_showtips').width()/2 });
-            }
-        }
-    });
+//     $(window).bind({
+//         resize: function() {
+//             if( $('#_showtips').length > 0 ) {
+//                 $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 150, left: $(window).width()/2 - $('#_showtips').width()/2 });
+//             }
+//         },
+//         scroll: function() {
+//             if( $('#_showtips').length > 0 ) {
+//                 $('#_showtips').css({ position:'absolute', top: $(document).scrollTop() + 150, left: $(window).width()/2 - $('#_showtips').width()/2 });
+//             }
+//         }
+//     });
     
-    if( $('#_showtips').length > 0 ) {
-    	timeoutObject = setTimeout(showtipsclose, 3000);
-    }
+//     if( $('#_showtips').length > 0 ) {
+//     	timeoutObject = setTimeout(showtipsclose, 3000);
+//     }
 }
 
 /** showtipsclose */

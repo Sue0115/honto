@@ -58,14 +58,14 @@
                     <div class="col-sm-10 col-sm-offset-1 login-panel">
                         <div class="login-container">
                             <div class="center">
-                                <h1>
+                                <h2>
                                     <i class="icon-leaf green"></i>
-                                    <span class="red"><?php echo config_item('site_name')?></span>
+                                    <span class="blue"><?php echo config_item('site_name')?></span>
                                     <span class="white">后台管理登录</span>
-                                </h1>
+                                </h2>
                                 <h4 class="blue">
-                                    &copy; <?php echo config_item('site_name')?> 
-                                    <a href="http://www.miibeian.gov.cn/" target="_blank">粤ICP备15099677号-1</a>
+                                   <!--  &copy; <?php echo config_item('site_name')?> 
+                                    <a href="http://www.miibeian.gov.cn/" target="_blank">粤ICP备xxxxx号-1</a> -->
                                 </h4>
                             </div>
 
@@ -77,7 +77,7 @@
                                         <div class="widget-main">
                                             <h4 class="header blue lighter bigger">
                                                 <i class="icon-coffee green"></i>
-                                                <span>请输入您的登录信息</span>
+                                                <span>账户登录</span>
                                             </h4>
 
                                             <div class="space-6"></div>
