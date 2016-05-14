@@ -1554,6 +1554,8 @@ class Ebay_product extends Admin_Controller{
         foreach($account as $ac){
 
 
+           $photo_url =   $this->userToken->getAccountPhotoUrl($ac);
+
             $is_add = true;
             $add_info  = array();
             $add_info['site'] = $posts['site'];
@@ -1659,7 +1661,19 @@ class Ebay_product extends Admin_Controller{
                 $add_info['ebay_quantity'] = isset($posts['skuinfo']['quantity'][0])?$posts['skuinfo']['quantity'][0]:'';
                 $add_info['skuinfo'] = isset($skuinfo)?json_encode($skuinfo):'';
                 $add_info['zidingyi'] = isset($posts['zidingyi'])?json_encode($posts['zidingyi']):'';
-                $add_info['detailPicListMul'] = isset($posts['detailPicListMul'])?json_encode($posts['detailPicListMul']):'';
+
+
+                $detailPicListMul  = isset($posts['detailPicListMul'])?$posts['detailPicListMul']:'';
+
+                if(!empty($detailPicListMul)&&$photo_url){
+                    foreach($detailPicListMul as $key=> $pic){
+                        $pic =  str_replace('imgurl.moonarstore.com',$photo_url,$pic);
+                        $detailPicListMul[$key] = $pic;
+                    }
+                }
+
+
+                $add_info['detailPicListMul'] = json_encode($detailPicListMul);
             }
 
 
@@ -1697,6 +1711,16 @@ class Ebay_product extends Admin_Controller{
 
             }
 
+
+            if($photo_url){
+                foreach($detailPicList as $key=> $pic){
+                    $pic =  str_replace('imgurl.moonarstore.com',$photo_url,$pic);
+                    $detailPicList[$key] = $pic;
+                }
+            }
+
+
+
             $add_info['detailPicList'] = isset($detailPicList)?json_encode($detailPicList):'';
 
             $add_info['templatehtml'] =$posts['templatehtml'];
@@ -1704,7 +1728,16 @@ class Ebay_product extends Admin_Controller{
             $add_info['template'] = $posts['template'];
             $add_info['template_titlle'] = $posts['template_titlle'];
 
-            $add_info['detailPicListDescription'] = isset($posts['detailPicListDescription'])?json_encode($posts['detailPicListDescription']):'';
+            $detailPicListDescription= isset($posts['detailPicListDescription'])?$posts['detailPicListDescription']:'';
+            if(!empty($posts['detailPicListDescription'])&&$photo_url){
+                foreach($detailPicListDescription as $key=> $pic){
+                    $pic =  str_replace('imgurl.moonarstore.com',$photo_url,$pic);
+                    $detailPicListDescription[$key] = $pic;
+                }
+            }
+
+
+            $add_info['detailPicListDescription'] = json_encode($detailPicListDescription);
 
             $add_info['detail']  = htmlspecialchars($posts['detail']);
 
@@ -1767,7 +1800,7 @@ class Ebay_product extends Admin_Controller{
                 continue;
             }
 
-            $un_set_store_category =array(15,56,57,43,47); // 这几个账号没有店铺分类 不验证
+            $un_set_store_category =array(15,43,47); // 这几个账号没有店铺分类 不验证
             if(!in_array($add_info['account_id'],$un_set_store_category)){
                 $store_category_id = $this->Ebay_store_with_category_model->getStoreCategoryBySkuTokenId($add_info['ebay_sku'],$add_info['account_id']);
 
@@ -2167,6 +2200,24 @@ class Ebay_product extends Admin_Controller{
                     }
 
             }
+        if(empty($result_pic)){
+
+            $url=    "http://imgurl.moonarstore.com/get_image.php?dirName=".$dirName;
+            $result =  $this->picCurl($url);
+
+
+
+            if(!strpos((string)$result,'文件夹'))
+            {
+
+                foreach($result as $ke => $v){
+
+                    $result_pic[] = $v;
+                }
+
+            }
+
+        }
 
 
             if(empty($result_pic)){

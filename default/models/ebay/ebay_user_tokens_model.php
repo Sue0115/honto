@@ -109,4 +109,21 @@ class Ebay_user_tokens_model extends MY_Model{
 
         return $data;
     }
+
+    public function getAccountPhotoUrl($token_id){
+        $option =array();
+        $option['where']['token_id']= $token_id;
+        $option['select'] = 'photo_url';
+
+        $result = $this->getOne($option,true);
+        if(isset($result['photo_url'])){
+            return trim($result['photo_url']);
+        }else{
+            return false;
+        }
+    }
+
+
+
+
 }
