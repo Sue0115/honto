@@ -79,7 +79,10 @@ class Smt_issue_center extends Admin_Controller
             $where['order_id'] = trim($search['order_id']);
             $string[] = 'search[order_id]=' . trim($search['order_id']);
         }
-
+        if (isset($search['issue_reason_type']) && $search['issue_reason_type']) {
+            $where['issue_reason_type'] = trim($search['issue_reason_type']);
+            $string[] = 'search[issue_reason_type]=' . trim($search['issue_reason_type']);
+        }
         if (isset($search['issue_reason_cn']) && $search['issue_reason_cn']) {
             if($search['issue_reason_cn']=='其他原因'){
                 $where['issue_reason_cn !='] = '货物仍然在运输途中';
@@ -160,7 +163,7 @@ class Smt_issue_center extends Admin_Controller
 
         //查询条件
         $options = array(
-            'select' => "id,order_id,issue_id,issue_status,issue_reason_cn,issue_creat_time,token_id,order_currency,num,snapshotUrl,order_price,issue_update_time,issueProcessDTOs_detail",
+            'select' => "id,order_id,issue_id,issue_status,issue_reason_cn,issue_reason_type,issue_creat_time,token_id,order_currency,num,snapshotUrl,order_price,issue_update_time,issueProcessDTOs_detail",
             'where' => $where,
             'where_in' => $in,
             'page' => $curpage,
@@ -179,7 +182,7 @@ class Smt_issue_center extends Admin_Controller
         if (!empty($data_array)) {
             foreach ($data_array as $key => $data) {
                 $order_option = array();
-                $order_option['select'] = 'shipmentAutoMatched,orders_shipping_time';
+                $order_option['select'] = 'shipmentAutoMatched,orders_status,orders_shipping_time';
                 $order_option['where']['orders_is_join'] =0;
                 $order_option['where']['buyer_id'] = $data['order_id'];
 
@@ -394,7 +397,7 @@ class Smt_issue_center extends Admin_Controller
 
 
 
-                $money_result =   $this->createMoneyBack($list_one['order_id'],$erp_reason,$checkAmount);
+                $money_result =   $this->createMoneyBack($list_one['order_id'],$erp_reason);
              /*   $money_result=array(
                     'status' => 2,
                     'note' =>'登记成功',

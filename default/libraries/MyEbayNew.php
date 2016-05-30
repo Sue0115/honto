@@ -139,8 +139,8 @@ class MyEbayNew
         $xml .="<?xml version='1.0' encoding='utf-8'?>";
         $xml .='<'.$api.'Request xmlns="urn:ebay:apis:eBLBaseComponents">';
         $xml .= "<ErrorLanguage>zh_CN</ErrorLanguage><WarningLevel>High</WarningLevel><Item>";
-        $xml .= ' <Title>' . $info['title'] . '</Title>';
-        $xml .= '<SubTitle>'.$info['subTitle'] .'</SubTitle>';
+        $xml .= ' <Title>' . htmlspecialchars($info['title']) . '</Title>';
+        $xml .= '<SubTitle>'.htmlspecialchars($info['subTitle']) .'</SubTitle>';
         $xml .= '<Site>'.$info['sitename'].'</Site>';
         $xml .= '<Currency>'.$info['Currency'].'</Currency>';
         $xml .= '<SKU>'.$info['ebay_sku'].'</SKU>';
@@ -173,11 +173,17 @@ class MyEbayNew
                 if($i==12){
                     break;
                 }
-                $xml .= '<PictureURL>' . $pic . '</PictureURL>';
+
+                $pic =  str_replace(" ", "%20",$pic);
+                $xml .= '<PictureURL>'.$pic.'</PictureURL>';
                 $i++;
             }
             $xml .= '</PictureDetails>';
         }
+
+        /*if($info['ebay_sku']=='352*JJ0283W#win'){
+            var_dump($xml);exit;
+        }*/
 
         if(!empty($info['product_info'])){
             $product_info = unserialize($info['product_info']);
@@ -214,6 +220,20 @@ class MyEbayNew
                 }
 
                 $xml .= '</ProductListingDetails>';
+            }else{
+                /*美国加拿大是UPC  澳大利亚是UPC
+                  英国是EAN 法国德国意大利西班牙EAN */
+                //现在没有UPC 或者EAN 就上不去。 通过分类获取属性的时候 UPC 或EAN 可能获取不出来 所现在自动填充
+                $xml .= '<ProductListingDetails>';
+                if($info['sitename']=='US'||$info['sitename']=="Canada"||$info['sitename']=="Australia"){
+                    $xml .= '<UPC>Does Not Apply</UPC>';
+                }
+                if($info['sitename']=='UK'||$info['sitename']=="Germany"||$info['sitename']=="France"||$info['sitename']=="Italy"||$info['sitename']=="Spain"){
+                    $xml .= '<EAN>Does Not Apply</EAN>';
+                }
+                $xml .= '</ProductListingDetails>';
+
+
             }
         }
 
@@ -225,7 +245,7 @@ class MyEbayNew
 
             foreach ($spe as $k => $s) {
                 if (!empty($s)) {
-                            $xml .= '<NameValueList><Name>' . $k . '</Name><Value>' . $s . '</Value></NameValueList>';  //这里是系统可选的的属性
+                            $xml .= '<NameValueList><Name>' . htmlspecialchars($k) . '</Name><Value>' . htmlspecialchars($s) . '</Value></NameValueList>';  //这里是系统可选的的属性
                 }
             }
             if (!empty($info['user_spe'])) {
@@ -356,19 +376,25 @@ class MyEbayNew
         {
             $excludeshiparr = explode(',', $info['un_ship']);
             foreach ($excludeshiparr as $v) {
-                $xml .= '<ExcludeShipToLocation>' . $v . '</ExcludeShipToLocation>';
+                $v =trim($v);
+                if(!empty($v)){
+                    $xml .= '<ExcludeShipToLocation>' . $v . '</ExcludeShipToLocation>';
+                }
             }
         }
         $xml .= '</ShippingDetails>';
+
+    //    echo $xml;exit;
         if(!empty($info['store_category_id'])){
             $xml .='<Storefront>';
             $xml .='<StoreCategoryID>'.$info['store_category_id'].'</StoreCategoryID>';
-            if(!empty($info['store_category_name'])){
+            /*if(!empty($info['store_category_name'])){
                 $xml .='<StoreCategoryName>'.$info['store_category_name'].'</StoreCategoryName>';
 
-            }
+            }*/
             $xml .='</Storefront>';
         }
+
 
 
         if ($type == 1) {
@@ -479,7 +505,9 @@ class MyEbayNew
                 $xml .= '<VariationSpecificName>' . $set_type . '</VariationSpecificName>';
                 foreach ($detailPicListMul as $v_1 => $v_2) {
                     $xml .= '<VariationSpecificPictureSet><VariationSpecificValue>' . $v_1 . '</VariationSpecificValue>';
-                    $xml .= ' <PictureURL>' . $v_2 . '</PictureURL>';
+
+                    $v_2 =  str_replace(" ", "%20",$v_2);
+                    $xml .= ' <PictureURL>' . ($v_2) . '</PictureURL>';
                     $xml .= '</VariationSpecificPictureSet>';
                 }
 
@@ -1268,6 +1296,8 @@ class MyEbayNew
         $xml .='<UploadSiteHostedPicturesRequest   xmlns="urn:ebay:apis:eBLBaseComponents">';
         $xml .='<RequesterCredentials><eBayAuthToken>'.$this->requestToken.'</eBayAuthToken></RequesterCredentials>';
        // $xml .='<ExternalPictureURL>http://imgurl.moonarstore.com/upload/E3112/E3112-2.jpg</ExternalPictureURL>';
+        //http://imgurl.moonarstore.com/image/DA3685-5674c0fe6bb83d9776834d46.jpg
+        //http://imgurl.moonarstore.com:3000/image-resize/1000x1000x100/DA3685-5674c0fe6bb83d9776834d46.jpg
         $xml .='<ExternalPictureURL>http://imgurl.moonarstore.com:3000/image-resize/1000x1000x100/DA3685-5674c0fe6bb83d9776834d46.jpg</ExternalPictureURL>';
         $xml .='</UploadSiteHostedPicturesRequest>';
         $result = $this->sendHttpRequest($xml);

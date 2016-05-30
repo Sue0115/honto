@@ -60,61 +60,11 @@ table{
 }
 </style>
 
-  <?php         //只有深圳仓单品单件和单品多件需要分仓打印拣货单
+  <?php 
   $i=1;
-  if($pickInfo['type'] !== '3' && $pickInfo['warehouseTitle'] !== '义乌仓'){     //多品多件和义乌仓不需要分仓
-	  $data = array();    //初始化2号仓
-	  foreach($productInfo as $k=>$v){
-		  if($v['products_location']){   
-			  $j = '';
-			  $location = explode('-',$v['products_location']);   //字符串-截取
-					   $num = strlen(ltrim($location['0'],'.'));  //第一个的字符串长度
-					   $j = substr($location['0'],0,1);
-					   if($num == 3 || $num == 2){                //长度为2或者3
-					         if($num == 3){                       //当长度是3时
-								 if($j !== 'A' || $j !== 'B' ){   //当长度是3时，首字母不为A或B
-								     $v['type'] = 2;
-						             $data[] = $v;
-									 unset($productInfo[$k]);      //释放数组
-						      }
-						   }
-					   }else{   //长度不为2或3  为2号仓单子
-					       $v['type'] = 2;
-						   $data[] = $v;
-						   unset($productInfo[$k]);               //释放数组
-					   }
-		  }
-	  }
-	  $o = array('0');    //循环数组时 默认多循环一次
-	  $data = array_merge($o,$data);
-	  $productInfo = array_merge($productInfo,$data);     //合并1,2仓
-	  } 
-  $f = 1;
-  $t = true;
-  $all = count($productInfo);   //合并后即计算数量
-  
-  $productInfo[$all] = $o;
-  $productInfo[$all+1] = $o;
-  $l = '';
-  
+  $all = count($productInfo); 
   foreach($productInfo as $k => $v){
-	if($pickInfo['type'] !== '3'){    //多品多件不分仓
-	 if(isset($v['type']) && $i !== 1 && $t){    //拼接 两个仓库分别打印不同面单
-			$i = 0;
-			$t = false;
-			$productInfo[$all] = $v;
-			$v = '';
-		}
-		if($f == $all){    //循环次数已经等于总数量时   进行数据交换
-			$t = $v;
-			$v = $productInfo[$all];
-			$l = $f +1;
-		}
-		if($f == $l){
-			$v = $t;
-		}
-		}
-      if($i==1 || ($i%33) == 1 && isset($v['product_sku'])){   //有product_sku时  进行头部循环
+    if($i==1 || ($i%33) == 1){
       $totalnum = 0;
   ?>
   <div id="main">
@@ -122,7 +72,7 @@ table{
     <p class="title">仓库发货拣货单（面单尺寸：<?php echo $pickInfo['template_size'];?>）</p>
     <div>
 	    <p class="ware">
-	    	<b style="margin-top:10px;display:inline-block;">仓库:<span><?php if($pickInfo['warehouseTitle'] == '义乌仓'){echo "义乌仓";}else if(isset($v['type']) && $pickInfo['type'] !== '3'){echo "深圳2仓";}else if($pickInfo['type'] !== '3'){echo "深圳1仓";}else{echo  "深圳仓";}?></span></b>
+	    	<b style="margin-top:10px;display:inline-block;">仓库:<span><?php echo $pickInfo['warehouseTitle'];?></span></b>
 	    	<span style="border:none;"></span><span style="width:50px;border:none;"></span>
 	    	<b style="margin-top:10px;display:inline-block;">类型:<span><?php echo $type_text[$pickInfo['type']]?></span></b>
 	    	<span style="border:none;"></span><span style="width:50px;border:none;"></span>
@@ -132,7 +82,7 @@ table{
 	    	  <span style="display:inline-block;height:40px;float:left;padding-top:10px;">单号：</span>
 	    	  <span style="display:inline-block;text-align:center;float:left;">
 	    		  <img src="<?php echo site_url('default/third_party')?>/chanage_code/barcode/html/image.php?code=code128&o=2&t=13&r=2&text=<?php echo $pickInfo['id']?>&f1=-1&f2=8&a1=&a2=B&a3=" style="display:block;"/>
-	    		  <b style="font-size:12px;display:block;"><?php echo $pickInfo['id'].'-'.ceil($f/33);?></b>
+	    		  <b style="font-size:12px;display:block;"><?php echo $pickInfo['id'].'-'.ceil($i/33);?></b>
 	    	  </span>
 	     </div>
      </div>
@@ -156,8 +106,7 @@ table{
       <td style="width:140px;">注意事项</td>
       <td style="width:330px;">品名</td>
     </tr>
-   <?php }if($i !== 0 && isset($v['product_sku'])){  //$i不等于0
-   ?>            
+   <?php }?>
     <tr>
       <td style="width:30px;"><?php echo $i;?></td>
       <td style="width:100px;"><?php echo $v['products_location']?></td>
@@ -167,9 +116,8 @@ table{
       <td style="width:330px;"><?php echo $v['products_name_cn']?></td>
     </tr>
    <?php
-   }
       $totalnum+=$v['product_num']; 
-      if(($i%33) == 0 || $i==$all+1 || $f==$all+1){
+      if(($i%33) == 0 || $i==$all){
    ?>
     <tr style="font-weight:bold;">
       <td colspan="6">总数：<?php echo $totalnum?></td>
@@ -183,7 +131,7 @@ table{
 	    	  <span style="display:inline-block;height:40px;float:left;padding-top:10px;">单号：</span>
 	    	  <span style="display:inline-block;text-align:center;float:left;">
 	    		  <img src="<?php echo site_url('default/third_party')?>/chanage_code/barcode/html/image.php?code=code128&o=2&t=13&r=2&text=<?php echo $pickInfo['id']?>&f1=-1&f2=8&a1=&a2=B&a3=" style="display:block;"/>
-	    		  <b style="font-size:12px;display:block;"><?php echo $pickInfo['id'].'-'.ceil($f/33);?></b>
+	    		  <b style="font-size:12px;display:block;"><?php echo $pickInfo['id'].'-'.ceil($i/33);?></b>
 	    	  </span>
 	</p>
   </div>
@@ -196,7 +144,6 @@ table{
    <?php
      }
      $i++;
-	 $f++;
      }
     ?>
   

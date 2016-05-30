@@ -18,9 +18,9 @@ class Ebay_product_model extends MY_Model{
         $option['where']['site'] = $site;
         $option['where']['account_id'] = $account_id;
         $option['where']['erp_sku'] = $sku;
-        $option['where']['status'] = 2;
-       $result = $this->getOne($option,true);
-        if(!empty($result)){
+        $option['order_by'] = 'id desc';
+        $result = $this->getAll2Array($option,true);
+        if($result['0']['status'] == 2){   //最后一次更改状态为上架
             return false;
         }else{
             return true;

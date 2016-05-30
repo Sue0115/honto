@@ -386,8 +386,9 @@ class Smt extends Admin_Controller
         //input类型的要考虑选择的单位
         $sysAttrIdAndUnit = array_key_exists('sysAttrIdAndUnit', $posts) ? $posts['sysAttrIdAndUnit'] : array();
         if ($sysAttrIdAndValueName){
+           // var_dump($sysAttrIdAndValueName);exit;
             foreach ($sysAttrIdAndValueName as $attrId => $value) {
-                if (trim($value)) {
+                if ($value!=='') {
                     //有输入值，并且有单位，把单位组合进去吧
                     $value = !empty($sysAttrIdAndUnit[$attrId]) ? trim($value).' '.$sysAttrIdAndUnit[$attrId] : trim($value);
                     $aeopAeProductPropertys[] = array(

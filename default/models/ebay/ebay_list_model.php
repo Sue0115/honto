@@ -148,6 +148,7 @@ class Ebay_list_model extends MY_Model{
             array('prefix' => '351', 'userId' => 583 ),
             array('prefix' => '352', 'userId' => 585),
             array('prefix' => '353', 'userId' => 584),
+            array('prefix' => '354', 'userId' => 609),
         );
 
         if($type ==1){

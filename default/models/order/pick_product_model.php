@@ -377,6 +377,29 @@ class Pick_product_model extends MY_Model {
         return $data;
 		
 	}
+	/*
+	*获得生成的拣货单详情数据
+	*对应的sku储位
+	*/
+	public function get_pickproduct_data($pick_id,$warehouse){
+		
+        $options = array();
+
+        $where = array();
+
+        $options['select'] = array($this->_table.'.*','p.products_location');
+
+        $join[] = array('erp_products_data p',$this->_table.'.product_sku=p.products_sku AND p.product_warehouse_id ='.$warehouse.'','inner');
+
+        $options['join'] = $join;
+		
+		$options['where']['pick_id'] = $pick_id;
+		
+        $data = $this->getAll2array($options,true);
+        
+        return $data;
+
+	}
 }
 
 /* End of file Pick_product_model.php */

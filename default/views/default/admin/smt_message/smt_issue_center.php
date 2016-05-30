@@ -15,6 +15,10 @@
         background-color: #00ffff;
         cursor: pointer;
     }
+    .is_orange{
+        font-size: 12px;
+        color: orange;
+    }
 </style>
 
 <div class="row" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
@@ -67,6 +71,17 @@
 
 
                                     ?>
+
+                                </select>
+                            </label>
+
+                            <label>
+                                原因类型:
+                                <select name="search[issue_reason_type]" id="issue_reason_type">
+                                    <option value="">--全部--</option>
+                                    <option value="1" <?php echo $search['issue_reason_type'] == 1 ? 'selected="selected"' : '' ?> >非卖家原因</option>
+                                    <option value="2" <?php echo $search['issue_reason_type'] == 2 ? 'selected="selected"' : '' ?> >物流原因</option>
+                                    <option value="3" <?php echo $search['issue_reason_type'] == 3 ? 'selected="selected"' : '' ?> >货不对版</option>
 
                                 </select>
                             </label>
@@ -150,8 +165,15 @@
 
 
                         <a id="export" class="btn btn-primary btn-sm" style="cursor: pointer">导入纠纷</a>
-
                     </div>
+                    <span style="color: red">
+                        ERP信息下 蓝底白字：发货已超过80天；
+                        ERP信息下 红色物流：非平邮订单
+                        ERP信息下 无发货时间：已撤单的订单
+                        金额总计  红色加粗：金额大于15美金</br>
+                        退款金额  橙色加粗：货不对版原因下高于5美金
+                        淡蓝色背景：此纠纷被买家修改过
+                        纠纷开始时间计算错误：  需到后台处理</span>
                 </div>
 
                 <table class="table    dataTable " id="tbody_content">
@@ -242,7 +264,7 @@
                             if (!empty($orders_data)) {
                                 foreach ($orders_data as $order) {
 
-                                    if (!empty($order['orders_shipping_time'])) {
+                                    if (!empty($order['orders_shipping_time'])&&($order['orders_shipping_time'] !='0000-00-00 00:00:00')&&$order['orders_status']!=6) {
 
                                         if (time() - strtotime($order['orders_shipping_time']) > 80 * 24 * 60 * 60) {
                                             echo '<span title="超过80天" style="font-size: 10px;color: #feffde;background-color: #0066FF " >' . $order['orders_shipping_time'] . '</span><br/>';
@@ -261,7 +283,7 @@
                                         }
 
                                     } else {
-                                        echo '<span title="未在ERP找到发货时间" style="font-size: 10px;color: #d2322d;" >无发货时间</span><br/>';
+                                        echo '<span title="未在ERP找到发货时间" style="font-size: 10px;color: #d2322d;" >已撤单的订单</span><br/>';
                                     }
 
 
@@ -312,14 +334,46 @@
                                 $detail = unserialize($list->issueProcessDTOs_detail);
                                 if ($detail):
                                 foreach ($detail as $de):
+                                    
                                     if($de['submitMemberType']=='buyer'){
-                                        echo isset($de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode']) ? '<span>' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'] . '</span><br/><span >' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode'] . '</span>' : '';
+
+                                        if(isset($de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'])){
+											$code = $de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode'];
+											$amount =  $de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'];
+											$code_type = '';
+											if($code !== 'USD'){    //货币单位不为USD时  进行货币兑换成USD
+												if($code == 'GBP'){    //汇率比 RUB 0.0145 ,EUR 1.1098 ,CAD 0.7432 ,GBP 1.4115 ,PLN 0.2592 ,AUD 0.7457 ,MXN 0.0565
+													$code_type = $amount * 1.411522634;
+												}else if($code == 'CAD'){
+													$code_type = $amount * 0.756476684;
+												}else if($code == 'AUD'){
+													$code_type = $amount * 0.7457;
+												}else if($code == 'EUR'){
+													$code_type = $amount * 1.101265823;
+												}else if(stripos($code,'RUB') || $code == 'RUB' ||  trim($code) == 'RUB' ){
+													$code_type = $amount * 0.014540019;
+												}else if($code == 'MXN'){
+													$code_type = $amount * 0.0565;
+												}else if($code == 'PLN'){
+													$code_type = $amount * 0.2592;
+												}
+												$de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode'] = 'USD';
+												$de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'] = round($code_type, 2);
+											}
+										}
+										if(isset($de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount']) && $de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'] > 5 &&($list->issue_reason_type==3)){
+											echo isset($de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode']) ? '<span class="is_orange">' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'] . '</span><br/><span class="is_orange">' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode'] . '</span>' : '';
+										}else{
+											echo isset($de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode']) ? '<span >' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['amount'] . '</span><br/><span >' . $de['issueRefundSuggestionList'][0]['issueMoneyPost']['currencyCode'] . '</span>' : '';
+										}
                                          break;
-                                    }
+									}
                                 endforeach;
                                 endif;
+								
+								
                             ?></td>
-                                <td class="center" style="font-size: 12px;">
+                                <td class="center" style="font-size: 12px;color: o ">
                                     <?php echo $issue_status[$list->issue_status]; ?>
                                 </td>
 

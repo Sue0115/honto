@@ -251,7 +251,7 @@ class after_sales_service extends Admin_Controller
                 case 6: //SMT平台
                     //SMT账号列表
                     $smt_options = array(
-                        'select' => array('token_id', 'seller_account'),
+                        'select' => array('token_id', 'seller_account','accountSuffix'),
                         'where' => array('token_status' => 0)
                     );
                     $data  = $this->userToken->getSmtTokenList($smt_options);

@@ -168,7 +168,7 @@
                             var options = '<option>--请选择--</option>'; //选项可以公用
 
                             $.each(data.data, function (index, el) {
-                                options += '<option value="' + el.token_id + '">' + el.token_id + '-' + el.seller_account + '</option>';
+                                options += '<option value="' + el.token_id + '">' + el.token_id + '-' + el.accountSuffix + '</option>';
                             });
 
                             if ($('#token_id').length > 0) { //说明输入框已经存在了

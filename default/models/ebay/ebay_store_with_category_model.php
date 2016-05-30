@@ -46,7 +46,7 @@ class Ebay_store_with_category_model extends MY_Model {
         }
 
 
-        $sql="SELECT products_sort   FROM  erp_products_data where  products_sku like  '".$sku."%' ";
+        $sql="SELECT products_sort   FROM  erp_products_data where productsIsActive = 1 AND products_sku like  '".$sku."%' ";
 
 
         $result =  $this->db->query($sql)->result_array();

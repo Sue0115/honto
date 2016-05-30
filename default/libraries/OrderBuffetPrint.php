@@ -4368,7 +4368,7 @@ articles prohibited by legislation or by postal or customers regulations.<br/>
 		$reStr .= '
 				<style>
 				*{margin:0; padding:0;}
-				#main{width:100mm; height:99mm; margin:0 auto;border:1px solid; overflow: hidden;}
+				#main{width:100mm; height:98mm; margin:0 auto;border:1px solid; overflow: hidden;}
 				body{font-size: 10px;}
 				.f_l{float:left;}
 				.f_r{float:right;}
@@ -4421,7 +4421,7 @@ articles prohibited by legislation or by postal or customers regulations.<br/>
 		        <br/><span style="font-size:12px;">'.$allParamArr['ordersInfo']['orders_shipping_code'].'</span>
 		      </p>
 		    </div>
-		    <div style="width:100%;height:44mm;overflow:hidden;">
+		    <div style="width:100%;height:50mm;overflow:hidden;">
 		       <table style="width:98%; border-collapse:collapse; border:medium none;margin:0 auto;" >
 		         <colgroup>
 			       <col width="42%">
@@ -4483,8 +4483,10 @@ articles prohibited by legislation or by postal or customers regulations.<br/>
 		          </td>
 		          <td style="border:1px solid #000;border-left:none;border-top:none;">'.$allParamArr['productsInfo'][0]['item_count'].'</td>
 		          <td style="border:1px solid #000;border-left:none;border-top:none;">'.$allParamArr['productsInfo'][0]['products_weight'].'</td>
-		          <td style="border:1px solid #000;border-left:none;border-top:none;">'.$allParamArr['first_declarevalue'].'</td>
-		         </tr>
+		          <td style="border:1px solid #000;border-left:none;border-top:none;">'.$allParamArr['first_declarevalue'].'
+				  <span style="float:right;font-weight:bold;display:inline-block;border:2px solid #000;width:40px;line-height:11px;height:11px;text-align:center;font-size:12px;">
+		 		             	已验视 </span></td>
+				  </tr>
 		       </table>
 		    </div>
 		  </div>
@@ -5323,7 +5325,7 @@ articles prohibited by legislation or by postal or customers regulations.<br/>
 		          <td style="border:1px solid #000;border-top:none;" colspan="2">Signature of sender:'.$allParamArr['sign'].'</td>
 		          <td style="border:1px solid #000;border-left:none;border-top:none;" colspan="2">Date:'.date('Y-m-d H:i:s').'</td>
 		         </tr>
-		         
+
 		       </table>
 		    </div>
 		  </div>
@@ -5538,6 +5540,8 @@ articles prohibited by legislation or by postal or customers regulations.<br/>
 				 			<div class="f_r" style="width:250px;">
 				 				'. $allParamArr['productsInfo']['sku'] .'
 				 			</div>
+				 			<div><span style="float:right;margin-top:4%;font-weight:bold;display:inline-block;border:2px solid #000;width:50px;line-height:15px;height:15px;font-size:14px;">
+		 		             	已验视 </span></div>
 				 						
 				 			<div style="clear: both;"></div>
 					 	</div>
@@ -9609,7 +9613,7 @@ Zip:'.$allParamArr['ordersInfo']['buyer_zip'].'	 Tel:'.$allParamArr['ordersInfo'
                    '. $allParamArr['ordersInfo']['buyer_address_1'] .' <br/>'. $allParamArr['ordersInfo']['buyer_address_2'] .'<br/>
                    '. $allParamArr['ordersInfo']['buyer_city'] .'  '. $allParamArr['ordersInfo']['buyer_state'] .'<br/>'
 					. $allParamArr['ordersInfo']['buyer_zip'] .'<br/>
-				   Tel:'.$allParamArr['ordersInfo']['buyer_phone'].'<br/>'.$allParamArr['buyerCountry'].'</p>
+				   Tel:'.$allParamArr['ordersInfo']['buyer_phone'].'<br/>'.$allParamArr['buyerCountry'].$allParamArr['country_cn'].'</p>
 					</div>
 				</div>
 				<div style="border-top:1px solid black;height: 4mm;font-size: 12px;clear:both;">
@@ -9746,7 +9750,7 @@ Zip:'.$allParamArr['ordersInfo']['buyer_zip'].'	 Tel:'.$allParamArr['ordersInfo'
                    '. $allParamArr['ordersInfo']['buyer_address_1'] .' <br/>'. $allParamArr['ordersInfo']['buyer_address_2'] .'<br/>
                    '. $allParamArr['ordersInfo']['buyer_city'] .'  '. $allParamArr['ordersInfo']['buyer_state'] .'<br/>'
 					. $allParamArr['ordersInfo']['buyer_zip'] .'<br/>
-				   Tel:'.$allParamArr['ordersInfo']['buyer_phone'].'<br/>'.$allParamArr['buyerCountry'].'</p>
+				   Tel:'.$allParamArr['ordersInfo']['buyer_phone'].'<br/>'.$allParamArr['buyerCountry'].'<br/>'.$allParamArr['country_cn'].'</p>
 					</div>
 				</div>
 				<div style="border-top:1px solid black;height: 4mm;font-size: 12px;clear:both;">

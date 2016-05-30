@@ -1222,7 +1222,7 @@ class Ebay_product extends Admin_Controller{
             $data['category_id'] =  $category_id;
             $data['site']  = $site_id;
             $data['site_name'] = $this->ebaysite->getSiteNameBySiteId($site_id);
-            $in =array('token_id'=>array(5,6,7,8,9,11,12,14,13,15,17,18,19,20,21,22,24,25,43,45,46,47,51,56,57));
+            $in =array('token_id'=>array(5,6,7,8,9,11,12,14,13,15,16,17,18,19,20,21,22,24,25,43,45,46,47,51,56,57));
             $data['token_arr'] = $this->userToken->getAll2Array(array('where'=>array('token_status'=>1), 'where_in' => $in,));
             $data['ebay_country'] = $this->country->getAll2Array();
             $data['ebay_condition']  = $this->condition->getConditionBySite($category_id,$site_id);
@@ -1230,14 +1230,18 @@ class Ebay_product extends Admin_Controller{
             if(!$data['ebay_condition']){
                     $condition = $this->getConditionNew($category_id,$site_id);
                     if(!$condition){
-                        echo "获取出错";
-                        exit;
+                        $data['ebay_condition'] ='';
+                        /*echo "获取出错";
+                        exit;*/
                     }else{
                         $data['ebay_condition']  = $this->condition->getConditionBySite($category_id,$site_id);
                     }
             }
-
-            $data['support_multi'] = $data['ebay_condition'][0]['variationsenabled']; //判断该分类是否支持多属性
+            if(isset( $data['ebay_condition'][0]['variationsenabled'])){
+                $data['support_multi'] = $data['ebay_condition'][0]['variationsenabled']; //判断该分类是否支持多属性
+            }else{
+                $data['support_multi'] = true;
+            }
 
             //getSpecificsNew
             $data['ebay_specifics'] =$this->Ebay_specifics_new_model->getSpecificsBySite($category_id,$site_id);
@@ -1594,8 +1598,8 @@ class Ebay_product extends Admin_Controller{
             $add_info['ean'] = isset($posts['needean'])?$posts['needean']:'';
             $add_info['isbn'] = isset($posts['needisbn'])?$posts['needisbn']:'';
 
-            $add_info['condition'] = $posts['ebay_condition'];
-            $add_info['condition_detail'] = $posts['ebay_condition_detail'];
+            $add_info['condition'] = isset($posts['ebay_condition'])?$posts['ebay_condition']:'';
+            $add_info['condition_detail'] = isset($posts['ebay_condition_detail'])?$posts['ebay_condition_detail']:'';
 
             $account_name = $this->userToken->getNameById($add_info['account_id']);
             $account_suffix = $this->Ebay_accountpaypal_model->getAccountSuffix($account_name);
@@ -2173,14 +2177,14 @@ class Ebay_product extends Admin_Controller{
 
     public function getSkuPic(){
         $dirName = $this->input->get_post('sku');
-        $dirName=strtoupper($dirName);
+        $dirName=trim(strtoupper($dirName));
         $sp = $this->input->get_post('type');
         $result_pic =array();
         if($sp=='sp'){
-               $url=   "http://imgurl.moonarstore.com/get_image.php?dirName=wish/".$dirName."&dir=SP";
+               $url=   "http://imgurl.moonarstore.com/get_image.php?dirName=".$dirName."&dir=SP";
 
         }else{
-            $url=    "http://imgurl.moonarstore.com/get_image.php?dirName=wish/".$dirName;
+            $url=    "http://imgurl.moonarstore.com/get_image.php?dirName=".$dirName;
 
         }
 
@@ -2218,17 +2222,40 @@ class Ebay_product extends Admin_Controller{
             }
 
         }
-
-
-            if(empty($result_pic)){
+/**
+    if(empty($result_pic) || count($result_pic)<5){
                 $url ='http://120.24.100.157:3000/api/sku/'.$dirName.'?include-sub=true&distinct=true';
+              $result=   $this->picCurl($url);
+                $pic_array= array();echo '<meta charset="utf-8" /><br>------<pre>File: '.__FILE__.' Line:'.__LINE__.' output:';print_r($result);exit;
+                if(!empty($result))
+                {
+                    foreach($result as $re)
+                    {
+                        $pic_array[] = $re['url'];
+                    }
+                }
+                if(!empty($pic_array))
+                {
+                    foreach($pic_array as $pic)
+                    {
+                       // $mid= str_replace("image", "image-resize/1000x1000x100", $pic);
+                        $last = 'http://imgurl.moonarstore.com'.$pic;
+                        $result_pic[] = $last;
+                    }
+                }
+
+            }
+            /**/
+        
+            if(empty($result_pic) || count($result_pic)<5){
+                $url ='http://120.24.100.157:70/getSkuImageInfo/getSkuImageInfo.php?distinct=true&include_sub=true&sku='.$dirName;
               $result=   $this->picCurl($url);
                 $pic_array= array();
                 if(!empty($result))
                 {
                     foreach($result as $re)
                     {
-                        $pic_array[] = $re['url'];
+                        $pic_array[] = '/getSkuImageInfo-resize/sku/'.$re['filename'];
                     }
                 }
                 if(!empty($pic_array))

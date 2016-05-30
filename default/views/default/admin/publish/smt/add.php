@@ -815,8 +815,8 @@
                             <option value="">--请选择--</option>
                             <?php
                             if ($shouhou_list):
-                                foreach ($shouhou_list as $template):
-                                    echo '<option value="'.$template['id'].'" '.(filterData('shouhouId', $draft_detail) == $template['id'] ? 'selected="selected"' : '').'>'.$template['name'].'</option>';
+                                foreach ($shouhou_list as $mkey=>$template):
+                                    echo '<option value="'.$template['id'].'" '.(filterData('shouhouId', $draft_detail) == $template['id'] ? 'selected="selected"' : ($mkey==0?'selected="selected"':'')).'>'.$template['name'].'</option>';
                                 endforeach;
                             endif;
                             ?>

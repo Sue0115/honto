@@ -74,6 +74,8 @@
                                 $content = (stripslashes(stripslashes($content)));
                                 echo $content;
                                 ?></p>
+                            <br/>
+                            <a  class="fanyi btn-primary btn-sm" style="cursor: pointer">翻译</a>
 
                             <p>
                                 <?php
@@ -168,8 +170,11 @@
                         </td>
                     </tr>
                     <tr bgcolor="#f6f6f6">
-                        <td class="col-sm-3"></td>
-                        <td class="col-sm-5 text-right"><a id="tijiao" class="btn-primary btn-sm" style="cursor: pointer"> 提交</a></td>
+                        <td class="col-sm-1"></td>
+                        <td class="col-sm-5 text-right ">
+                        <!--    <a id="fanyi" class="btn-primary btn-sm" style="cursor: pointer">翻译</a>-->
+                            <a id="tijiao" class="btn-primary btn-sm" style="cursor: pointer"> 提交</a>
+                        </td>
                     </tr>
                 </table>
             </form>
@@ -236,7 +241,14 @@
 
                 <tr >
                     <td>总金额:</td>
-                    <td> <?php echo $o['orders_total'].' '.$o['currency_type'];?></td>
+                    <td>
+                        <?php  if($o['orders_total'] >=5){
+                            echo '<font color="red">'.$o['orders_total'].' '.$o['currency_type'].'</font>' ;
+                        }else{
+                            echo $o['orders_total'].' '.$o['currency_type'];
+                        } ?>
+
+                    </td>
                 </tr>
                 <tr>
                     <td>运费:</td>
@@ -365,9 +377,35 @@
     <script src="<?php echo static_url('theme/common/layer/layer.js') ?>"></script>
 <script type="text/javascript">
 
+    $(".fanyi").click(function () {
+        var add = $(this).parent().children().eq(0);
+        var text = $(this).parent().children().eq(0).text();
 
-    $(function(){
+        if(text.indexOf("百度翻译") > 0 ){
+            return false;
+        }
+        text =changeSome(text,1);
+        $.ajax({
+            url: '<?php echo admin_base_url("smt_message/smt_message_center/testbaidu");?>',
+            data: 'info=' + text,
+            type: 'POST',
+            dataType: 'JSON',
+            success: function (data) {
+                if(data.status==1){
+                    var news = changeSome( data.info,2);
+                    add.append('<br/>百度翻译<br/>'+news);
+                }
+            }
+        });
+    });
+    $("#fanyi").click(function () {
       var text =　$("#detail_table tr:last").children().eq(1).children().eq(0).text();
+
+
+        if(text.indexOf("百度翻译") > 0 ){
+            return false;
+        }
+
         text =changeSome(text,1);
      //   text= text.replace(/"?"/g, "@");
         $.ajax({

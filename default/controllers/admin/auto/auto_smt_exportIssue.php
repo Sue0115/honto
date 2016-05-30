@@ -17,8 +17,25 @@ class Auto_smt_exportIssue extends MY_Controller
         // 'ACCEPTISSUE', //卖家接受纠纷     相当于完成了的纠纷
         // 'WAIT_BUYER_SEND_GOODS', //等待买家发货
         //  'WAIT_SELLER_RECEIVE_GOODS', // 买家发货，等待卖家收货
-        //   'ARBITRATING', // 仲裁中
+           'ARBITRATING', // 仲裁中
         //   'SELLER_RESPONSE_ISSUE_TIMEOUT' // 卖家响应纠纷超时  对应相关超时的不需要获取
+    );
+    private $reason_type_buyer = array(
+        //1 非卖家原因
+       1=>array( '买家原因',
+                    '七天无理由退货',
+                    '未按约定的物流方式发货'
+       ),
+        //2 物流原因
+        2=>array(
+            '运单号无法查询',
+            '限时达超时',
+            '物流退回了包裹',
+            '运输途中',
+            '发错地址',
+            '海关扣关'
+        )
+        // 3 货不对版
     );
 
 
@@ -88,12 +105,24 @@ class Auto_smt_exportIssue extends MY_Controller
                                     $list_info['order_id_child'] = $list['orderId'];
                                     $list_info['issue_status'] = $list['issueStatus'];
                                     $list_info['issue_reason_cn'] = $list['reasonChinese'];
+                                    $list_info['issue_reason_type'] = 3;
+                                    foreach($this->reason_type_buyer as $key =>$reason){
+                                      foreach($reason as $re){
+                                          if(strpos($list_info['issue_reason_cn'],$re) !== false) {
+                                              $list_info['issue_reason_type'] = $key;
+                                              break;
+                                          }
+                                      }
+                                    }
+
+
                                     $is_many = false;
                                     if($list['issueStatus']=='seller_refuse_refund'){
 
 
                                         foreach($detail['data']['issueAPIIssueDTO']['issueProcessDTOs'] as $key=> $de){
                                             if($de['actionType']=='cancel'){
+                                                    $is_many=true;
                                                     $str = mb_substr($detail['data']['issueAPIIssueDTO']['issueProcessDTOs'][$key-1]['gmtModified'], 0, 14);
                                                     break;
                                             }

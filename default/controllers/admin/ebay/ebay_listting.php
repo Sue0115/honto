@@ -431,6 +431,15 @@ class Ebay_listting extends MY_Controller{
                     $this->Ebay_operationlog_model->add($info);
 
                 }
+                //同时处理一下erp_ebay_product 这个表的数据吧
+
+                $option_new =array();
+                $option['where']['itemid'] = $re['item_number'];
+
+                $data_new = array();
+                $data_new['status'] = 2;
+                $this->Ebay_product_model->update($data_new,$option_new);
+
             }
         }
     }

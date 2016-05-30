@@ -361,6 +361,15 @@ class orders_blacklist extends Admin_Controller{
 							
 							$num_buyer_email = $this->orders_blacklist_model->get_count_buyer($data_array[$i]['buyer_email'],$buyer_id = '',$zip = '',$buyer_name = '');
 							
+							if(!isset($num_buyer_name['0']['num'])){//当搜索条件为空时  不执行sql  返回空数组  赋0
+								
+								$num_buyer_name['0']['num'] = 0;
+							}
+							if(!isset($num_buyer_email['0']['num'])){
+								
+								$num_buyer_email['0']['num'] = 0;
+							}
+							
 							if($num_buyer_name['0']['num'] > $num_buyer_email['0']['num'] || $num_buyer_name['0']['orders_type'] == 13){  //当订单中buyer_name搜索的黑名单订单大时  wish 只根据buyer_name判断黑名单数量
 								
 								$data_array[$i]['color_type'] = 1;   //为buyer_name搜索的黑名单客户

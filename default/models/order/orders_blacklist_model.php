@@ -244,8 +244,13 @@ class Orders_blacklist_model extends MY_Model {
 		
 		$options['where']=$where;
 		
-        $data = $this->getAll2Array($options);
-
+		if($email || $id || $zip || $buyer_name){
+			
+			$data = $this->getAll2Array($options);
+		}else{
+			$data = array();
+		}
+        
         return $data;
 		
 	}

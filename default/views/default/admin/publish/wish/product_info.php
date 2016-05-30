@@ -629,9 +629,9 @@
             </button>
             
            
-            <button class="btn btn-reset" type="reset">
+          <!--  <button class="btn btn-reset" type="reset">
                 <i class="icon-undo bigger-110"></i>重置
-            </button>
+            </button>-->
         </div>
     </div>
 </form>
@@ -805,10 +805,6 @@ $(function(){
             sku_pre =sku_pre+'*';
         }
         var sku_buf = $("#buffer").val();//sku后缀
-        if(sku_buf !=''){
-            sku_buf ='#'+sku_buf;
-
-        }
         var batch_price = $("#batch_price").val();//批量加价格
         if((generate_sku_parent=='')||(generate_sku_color=='')||(generate_sku_size=='')){
             alert('数据不能为空');
@@ -823,9 +819,9 @@ $(function(){
             cache: false,
             dataType: 'JSON',
             success: function (data) {
-                $("#generate_sku_parent").val('');
+               /* $("#generate_sku_parent").val('');
                 $("#generate_sku_color").val('');
-                $("#generate_sku_size").val('');
+                $("#generate_sku_size").val('');*/
                 for(var i=0;i<data.data.length;i++){
                     input_row = '<div class="form-group">'
                     + '<label class="col-sm-1 control-label"></label>'
@@ -1159,9 +1155,6 @@ $('.choose_account').click(function(){
     
 });
 
-
-
-
 $('#add_mul_pic').click(function () {
     var value = $('#choose_type').val();
     var info_arr = new Array;
@@ -1270,7 +1263,7 @@ function addDir(obj, url, token_id, opt){
 
 							h_url = h_url.replace('image-resize/100x-x75','image');
                             
-                            liStr += '<li><div><img src="' + el + '" width="100" height="100" style="border: 0px;"><input type="hidden" name="detailPicList[]" value="' + h_url + '" /><a href="javascript: void(0);" class="pic-del">删除</a></div></li>';
+                            liStr += '<li><div><img src="' + (el.replace('getSkuImageInfo','getSkuImageInfo-resize')) + '" width="100" height="100" style="border: 0px;"><input type="hidden" name="detailPicList[]" value="' + h_url + '" /><a href="javascript: void(0);" class="pic-del">删除</a></div></li>';
                         });
                         $(obj).closest('div.form-group').find('ul').append(liStr);
                         $("#color_picture").show();

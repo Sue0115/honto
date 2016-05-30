@@ -73,7 +73,7 @@ class Pick_manage extends Admin_Controller{
 		$pick_id='';//拣货单号
 		$pick_type='';//拣货单类型
 		$pick_status='';//拣货单状态
-		$pick_warehouse='';//拣货单所属仓库
+		$pick_warehouse='';//拣货单所属仓库		
 		if(isset($search_data['shipmentID']) && $shipmentID = trim($search_data['shipmentID'])){
 			$where['shipment_id'] = $shipmentID;
 			$string .= 'search[shipmentID]='.$shipmentID;
@@ -91,8 +91,11 @@ class Pick_manage extends Admin_Controller{
 			$string .= '&search[pick_status]='.$pick_status;
 		}
 		if(isset($search_data['pick_warehouse']) && $pick_warehouse = trim($search_data['pick_warehouse'])){
-			$where[$this->model->_table.'.warehouse'] = $pick_warehouse;
-			$string .= '&search[pick_warehouse]='.$pick_warehouse;
+			if($search_data['pick_warehouse'] == 1002){ //仓库查询
+				$pick_warehouse = 1000;
+			}
+			$where[$this->model->_table.'.pick_warehouse'] = $search_data['pick_warehouse'];
+			$string .= '&search[pick_warehouse]='.$search_data['pick_warehouse'];
 		}
 
 		$where["{$this->model->_table}.status >="] = 1;
@@ -114,13 +117,15 @@ class Pick_manage extends Admin_Controller{
 		foreach($warehouse as $va){
 		  $warehouseArr[$va['warehouseID']]=$va['warehouseTitle'];
 		}
+		$warehouseArr['1000'] = '深圳一仓';   //区分仓库
+		$warehouseArr['1002'] = '深圳二仓';
 
 		
 		$search_data['shipmentID'] = $shipmentID;
 		$search_data['pick_id'] = $pick_id;
 		$search_data['pick_type'] = $pick_type;
 		$search_data['pick_status'] = $pick_status;
-		$search_data['pick_warehouse'] = $pick_warehouse;
+		$search_data['pick_warehouse'] = isset($search_data['pick_warehouse']) ? $search_data['pick_warehouse']:'';
 		$options	= array(
 			'page'		=> $cupage,
 			'per_page'	=> $per_page,
@@ -404,6 +409,9 @@ class Pick_manage extends Admin_Controller{
 			if(is_array($data['shipment_id'])){
 				$data['shipment_id'] = join(',',$data['shipment_id']);
 			}
+			if($data['warehouse']){
+				$data['pick_warehouse'] = $data['warehouse'];
+			}
 
 			$pick_id = $this->model->add($data);
 
@@ -415,6 +423,7 @@ class Pick_manage extends Admin_Controller{
 			$pick_data['order_num'] = 0;//订单总数
 			$pick_data['sku_num'] = 0;//sku总数
 			$pick_data['num'] = 0;//货品总数
+			$pick_data['pick_warehouse'] = $data['warehouse'];//仓库
 
 			foreach ($order as $key => $o) {
 				
@@ -475,30 +484,15 @@ class Pick_manage extends Admin_Controller{
 						$product_tof = false;
 						break;
 					}
-
 					$product_num += $product['item_count'];
 				}
-
-				//
 				$order_tof = false;
-				$log_tof = false;
+				//$log_tof = false;
 				if($product_tof){
 					//订单状态变为已打印
 					$order_tof = $this->orders_model->change_order_status($erp_orders_id,4);
-					
-					//写入操作日志
-					if($order_tof){
-						$data = array();
-						$data['operateUser'] = $uid;
-						$data['operateKey'] = $erp_orders_id;
-						$data['operateText'] = "生成拣货单（{$pick_id}），订单状态变为已打印";
-
-						$log_tof = $this->operate_log_model->add_order_operate_log($data);
-						
-					}
 				}
-
-				if($product_tof && $order_tof && $log_tof && $this->db->trans_status() === TRUE){
+				if($product_tof && $order_tof && $this->db->trans_status() === TRUE){
 					$pick_data['order_num']++;
 					$pick_data['sku_num'] += count($order_product);
 					$pick_data['num'] += $product_num; 
@@ -506,20 +500,99 @@ class Pick_manage extends Admin_Controller{
 				}else{
 					$this->db->trans_rollback();
 				}
-
-				
 			}
-
+			$pickproduct_data = $this->pick_product_model->get_pickproduct_data($pick_id,$data['warehouse']);  //获得生成的拣货单详情
+			
+			if($data['warehouse'] !== 1025 && $pick_type !== 3 && $pickproduct_data){   //义乌仓和多品多件不需要进行区分
+				$two_num = 0;       //2号仓商品数
+				$order_num = 0;
+				$string = '';
+				$data['pick_warehouse'] = 1002;//2号仓拣货单
+				$pick_product_id = $this->model->add($data);      //新增拣货单
+				$i = '';
+				foreach($pickproduct_data as $k=>$v){
+				   if($v['products_location']){                   //sku有仓库
+					  $pick = $pick_id;
+					  $j = '';
+					  $location = explode('-',$v['products_location']);   //字符串-截取
+					   $num = strlen(ltrim($location['0'],'.'));  //第一个的字符串长度
+					   $j = substr($location['0'],0,1);
+					   if($num == 3 || $num == 2){                //长度为2或者3
+					         if($num == 3){                       //当长度是3时
+								 if($j !== 'A' || $j !== 'B' ){   //当长度是3时，首字母不为A或B
+									 $two_num += $v['product_num'];     //2号仓商品数
+									 $order_num++;
+									 $string .= $v['id'].',';               //执行更改的id
+									 $pick = $pick_product_id;
+						      }
+						   }
+					   }else{   //长度不为2或3  为2号仓单子
+						   $two_num += $v['product_num'];     //2号仓商品数
+						   $order_num++;
+						   $string .= $v['id'].',';               //执行更改的id
+						   $pick = $pick_product_id;
+					   }
+		            }
+						$data = array();  //添加成功日志到订单
+						$data['operateUser'] = $uid;
+						$data['operateKey'] = $v['orders_id'];
+						$data['operateText'] = "生成拣货单（{$pick}），订单状态变为已打印";
+						if($i !== $v['orders_id']){//当本次订单号不等于上一个的订单号时  (多品多个的订单只添加一次拣货单日志)
+							$log_tof = $this->operate_log_model->add_order_operate_log($data);   //分拣货单号进行添加订单日志
+						}
+						$i = $v['orders_id'];
+			     }
+				 
+					 $option = array();
+					 if($pick_product_id){
+						 $pick_data['order_num'] = $pick_data['order_num'] - $order_num;   //1仓数量=总-2仓数量
+						 $pick_data['sku_num']   = $pick_data['sku_num'] - $order_num;
+						 $pick_data['num']       = $pick_data['num'] - $two_num;
+						 $option['where']['id'] = $pick_product_id;
+						 $two_data['order_num'] = $order_num;
+						 $two_data['sku_num'] = $order_num;
+						 $two_data['num'] = $two_num;
+						 $two_data['pick_warehouse'] = 1002;   //2号仓
+						 if($two_data['order_num'] == 0 || $order_num == 0){       //如果为空  状态为-1
+							 $two_data['status'] = -1;
+						 }
+						 $pick_product_tof = $this->model->update($two_data,$option);  //修改2号仓拣货单数据
+					 }
+					 if($string){
+						 $string = rtrim($string,',');
+						 $sqls = "update erp_pick_product set pick_id=".$pick_product_id." where id in(".$string.")";
+						 $result = $this->model->return_query($sqls);     //更改2号仓的拣货单详情数据  查询判断出的2号仓数据  进行修改标记为2号仓
+					 }
+			    
+             }else{  //如果为义乌仓或者深圳仓多品多件数据  不进行分拣货单号添加订单日志
+			 $i = '';
+				 foreach($pickproduct_data as $k=>$v){
+					    $data = array();  //添加成功日志到订单
+						$data['operateUser'] = $uid;
+						$data['operateKey'] = $v['orders_id'];
+						$data['operateText'] = "生成拣货单（{$pick_id}），订单状态变为已打印";
+						if($i !== $v['orders_id']){//单品多件、多品多件同一个订单只添加一次日志
+							$log_tof = $this->operate_log_model->add_order_operate_log($data);//添加拣货单日志
+						}
+						$i = $v['orders_id'];
+						
+				 }
+			 }
 			//生成结束,更新拣货单信息
 			$options = array();
 			$options['where']['id'] = $pick_id;
-			if($pick_data['order_num'] == 0){//如果生成订单总数为零的，拣货单状态为-1
+			if($pick_data['order_num'] == 0 && $pick_data['sku_num'] == 0){//如果生成订单总数为零的，拣货单状态为-1
 				$pick_data['status'] = -1;
 			}
 
 			$pick_tof = $this->model->update($pick_data,$options);
 			
-			if($pick_tof){
+			if($pick_tof && isset($pick_product_id)){    //分仓数据
+				$ordernum = $pick_data['order_num']+$order_num;
+				$skunum = $pick_data['sku_num']+$order_num;
+				$resultnum = $pick_data['num']+$two_num;
+				echo '{"info":"成功生成1仓拣货单：'.$pick_id.'和2仓拣货单'.$pick_product_id.',订单总数：'.$ordernum.',sku总数：'.$ordernum.',商品总数：'.$resultnum.'","status":"n"}';
+			}else if($pick_tof && !isset($pick_product_id)){
 				echo '{"info":"成功生成拣货单：'.$pick_id.',订单总数：'.$pick_data['order_num'].',sku总数：'.$pick_data['sku_num'].',商品总数：'.$pick_data['num'].'","status":"n"}';
 			}else{
 				echo '{"info":"更新拣货单：'.$pick_id.'订单总数、sku总数、商品总数失败。请告知IT。","status":"n"}';

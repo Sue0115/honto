@@ -501,7 +501,7 @@
                 <br/>
 
                 <div class="form-group"></div>
-                <?php if ($ebay_condition[0]['upcenabled'] == 'Required'): ?>
+                <?php if (isset($ebay_condition[0])&&$ebay_condition[0]['upcenabled'] != ''): ?>
                     <div class="form-group">
                         <label class="control-label col-sm-2">UPC ：</label>
 
@@ -511,7 +511,7 @@
                     </div>
                 <?php endif; ?>
 
-                <?php if ($ebay_condition[0]['eanenabled'] == 'Required'): ?>
+                <?php if (isset($ebay_condition[0])&&$ebay_condition[0]['eanenabled'] != ''): ?>
                     <div class="form-group">
                         <label class="control-label col-sm-2"    >EAN ：</label>
 
@@ -521,7 +521,7 @@
                     </div>
                 <?php endif; ?>
 
-                <?php if ($ebay_condition[0]['isbnenabled'] == 'Required'): ?>
+                <?php if (isset($ebay_condition[0])&&$ebay_condition[0]['isbnenabled'] != ''): ?>
                     <div class="form-group">
                         <label class="control-label col-sm-2" name="needisbn"  value="<?php echo filterDataEbay('isbn', $product_info); ?>" >ISBN ：</label>
 
@@ -535,11 +535,13 @@
                     <label class="control-label col-sm-2">物品状况 ：</label>
 
                     <div class="col-sm-4">
+                        <?php if(isset($ebay_condition)&&!empty($ebay_condition)){  ?>
                         <select id="ebay_condition" name="ebay_condition">
                             <?php foreach ($ebay_condition as $condition): ?>
                                 <option value="<?php echo $condition['condition_id'] ?>"   <?php   if(filterDataEbay('condition', $product_info)==$condition['condition_id']){ echo  'selected="selected"';}         ?>          > <?php echo $condition['displayname'] ?></option>
                             <?php endforeach; ?>
                         </select>
+                        <?php  } ?>
                     </div>
                 </div>
 
@@ -1526,7 +1528,7 @@
                         if (data.status == 1) {
                             var liStr = '';
                             $.each(data.data, function (index, el) {
-                                liStr += '<li><div><img src="' + el + '" width="100" height="100" style="border: 0px;"><input type="hidden" name="detailPicList[]" value="' + el + '" /><input type="checkbox" title="可做为橱窗图" name="specify_image[]" value="' + el + '" ><a href="javascript: void(0);" class="pic-del">删除</a></div></li>';
+                                liStr += '<li><div><img src="' + el + '" width="100" height="100" style="border: 0px;"><input type="hidden" name="detailPicList[]" value="' + el.replace('getSkuImageInfo-resize','getSkuImageInfo') + '" /><input type="checkbox" title="可做为橱窗图" name="specify_image[]" value="' + el.replace('getSkuImageInfo-resize','getSkuImageInfo') + '" ><a href="javascript: void(0);" class="pic-del">删除</a></div></li>';
                             });
                             $("#pic-detail").append(liStr);
                         } else {
